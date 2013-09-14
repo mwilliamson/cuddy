@@ -25,13 +25,8 @@ class AuthorAdmin(object):
         cuddy.field("Name", "name", type=cuddy.string)
     ]
     
-    def describe(self, author):
+    def short_describe(self, author):
         return author.name
-    
-    def index_fields(self):
-        return [
-            cuddy.field("Name", "name", type=cuddy.string)
-        ]
     
     def fetch_all(self):
         return [bob]
@@ -40,18 +35,12 @@ class AuthorAdmin(object):
 class BlogPostAdmin(object):
     name = "Blog post"
     slug = "blog-post"
+    
     fields = [
         cuddy.field("Title", "title", type=cuddy.string),
         cuddy.field("Author", "author", type=AuthorAdmin),
         cuddy.field("Date", "created_date", type=cuddy.datetime),
     ]
-    
-    def index_fields(self):
-        return [
-            cuddy.field("Title", "title"),
-            cuddy.field("Author", lambda post: post.author.name),
-            cuddy.field("Date", "created_date"),
-        ]
     
     def fetch_all(self):
         return [

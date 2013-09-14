@@ -1,6 +1,8 @@
 class StringAdmin(object):
-    pass
+    def short_describe(self, value):
+        return value
 
 
 class DateTimeAdmin(object):
-    pass
+    def short_describe(self, value):
+        return str(value)

@@ -5,7 +5,7 @@ class Model(object):
     
 
 class Field(object):
-    def __init__(self, title, getter, type=None):
+    def __init__(self, title, getter, type):
         if isinstance(getter, basestring):
             attribute_name = getter
             getter = lambda instance: getattr(instance, attribute_name)
@@ -14,5 +14,6 @@ class Field(object):
         self._getter = getter
         self._type = type
         
-    def read(self, instance):
-        return self._getter(instance)
+    def short_describe(self, instance):
+        value = self._getter(instance)
+        return self._type().short_describe(value)

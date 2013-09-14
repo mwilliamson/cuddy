@@ -34,9 +34,10 @@ class ModelIndexController(zuice.Base):
         ModelAdmin = next(model for model in self._model_admins if model.slug == model_slug)
         model_admin = ModelAdmin()
         
-        fields = model_admin.index_fields()
+        fields = model_admin.fields
+        
         instances = [
-            {"fields": [field.read(instance) for field in fields]}
+            {"fields": [field.short_describe(instance) for field in fields]}
             for instance in model_admin.fetch_all()
         ]
         
