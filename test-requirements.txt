@@ -1,0 +1,4 @@
+nose>=1.2.1,<2.0
+gunicorn>=18.0,<19.0
+spur.local>=0.3.5,<0.4
+selenium>=2.32,<3.0

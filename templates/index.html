@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Cuddy</h1>
+  
+  {% for model in models %}
+    <h2>{{ model.name }}</h2>
+  {% endfor %}
+{% endblock %}
