@@ -16,4 +16,8 @@ class Field(object):
         
     def short_describe(self, instance):
         value = self._getter(instance)
-        return self._type().short_describe(value)
+        value_admin = self._type()
+        if hasattr(value_admin, "short_describe"):
+            return value_admin.short_describe(value)
+        else:
+            return str(value)
