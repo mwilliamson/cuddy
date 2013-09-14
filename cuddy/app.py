@@ -25,15 +25,16 @@ class Cuddy(object):
         path_parts = filter(lambda part: part, request.path.split("/"))
         if len(path_parts) == 1:
             model_slug = path_parts[0]
-            model = next(model for model in self._models if model.slug == model_slug)
+            ModelAdmin = next(model for model in self._models if model.slug == model_slug)
+            model_admin = ModelAdmin()
             
             instances = [
-                {"fields": [field.read(instance) for field in model().index_fields()]}
-                for instance in model().fetch_all()
+                {"fields": [field.read(instance) for field in model_admin.index_fields()]}
+                for instance in model_admin.fetch_all()
             ]
             
             return Response(
-                self._templates.template("model-index.html", {"model": model, "instances": instances}),
+                self._templates.template("model-index.html", {"fields": model_admin.fields, "instances": instances}),
                 mimetype="text/html",
             )
         else:
