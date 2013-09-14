@@ -34,13 +34,14 @@ class ModelIndexController(zuice.Base):
         ModelAdmin = next(model for model in self._model_admins if model.slug == model_slug)
         model_admin = ModelAdmin()
         
+        fields = model_admin.index_fields()
         instances = [
-            {"fields": [field.read(instance) for field in model_admin.index_fields()]}
+            {"fields": [field.read(instance) for field in fields]}
             for instance in model_admin.fetch_all()
         ]
         
         return Response(
-            self._templates.template("model-index.html", {"fields": model_admin.fields, "instances": instances}),
+            self._templates.template("model-index.html", {"fields": fields, "instances": instances}),
             mimetype="text/html",
         )
     
