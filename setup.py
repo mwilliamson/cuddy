@@ -19,5 +19,6 @@ setup(
     install_requires=[
         "werkzeug>=0.9.4,<0.10",
         "jinja2>=2.7.1,<2.8",
+        "zuice>=0.2,<0.3",
     ],
 )

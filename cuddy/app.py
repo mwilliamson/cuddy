@@ -1,5 +1,6 @@
 from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import SharedDataMiddleware
+import zuice
 
 from . import templating, paths
 
@@ -8,46 +9,64 @@ def create():
     return Cuddy()
 
 
-class IndexController(object):
-    def __init__(self, models):
-        self._models = models
+class IndexController(zuice.Base):
+    _model_admins = zuice.dependency("model-admins")
+    _templates = zuice.dependency(templating.Templates)
+    
+    def respond(self, request):
+        model_view_models = [
+            # TODO: reverse URLs
+            ModelViewModel(model.name, "/{0}".format(model.slug))
+            for model in self._model_admins
+        ]
+        
+        return Response(
+            self._templates.template("index.html", {"models": model_view_models}),
+            mimetype="text/html",
+        )
 
+
+class ModelIndexController(zuice.Base):
+    _model_admins = zuice.dependency("model-admins")
+    _templates = zuice.dependency(templating.Templates)
+    
+    def respond(self, request, model_slug):
+        ModelAdmin = next(model for model in self._model_admins if model.slug == model_slug)
+        model_admin = ModelAdmin()
+        
+        instances = [
+            {"fields": [field.read(instance) for field in model_admin.index_fields()]}
+            for instance in model_admin.fetch_all()
+        ]
+        
+        return Response(
+            self._templates.template("model-index.html", {"fields": model_admin.fields, "instances": instances}),
+            mimetype="text/html",
+        )
+    
 
 class Cuddy(object):
     def __init__(self):
         self._models = []
-        self._templates = templating.templates()
     
     def add(self, model):
         self._models.append(model)
     
     def respond(self, request):
+        bindings = zuice.Bindings()
+        bindings.bind("model-admins").to_instance(self._models)
+        bindings.bind(templating.Templates).to_instance(templating.templates())
+        
+        injector = zuice.Injector(bindings)
         path_parts = filter(lambda part: part, request.path.split("/"))
+        
         if len(path_parts) == 1:
-            model_slug = path_parts[0]
-            ModelAdmin = next(model for model in self._models if model.slug == model_slug)
-            model_admin = ModelAdmin()
-            
-            instances = [
-                {"fields": [field.read(instance) for field in model_admin.index_fields()]}
-                for instance in model_admin.fetch_all()
-            ]
-            
-            return Response(
-                self._templates.template("model-index.html", {"fields": model_admin.fields, "instances": instances}),
-                mimetype="text/html",
-            )
+            controller_cls = ModelIndexController
         else:
-            model_view_models = [
-                # TODO: reverse URLs
-                ModelViewModel(model.name, "/{0}".format(model.slug))
-                for model in self._models
-            ]
+            controller_cls = IndexController
             
-            return Response(
-                self._templates.template("index.html", {"models": model_view_models}),
-                mimetype="text/html",
-            )
+        controller = injector.get(controller_cls)
+        return controller.respond(request, *path_parts)
 
     def wsgi_app(self):
         def handle(environ, start_response):
