@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Cuddy</h1>
+  
+  <table>
+    <thead>
+      {% for field in model.fields %}
+        <th>{{ field.title }}</th>
+      {% endfor %}
+    </thead>
+    <tbody>
+      {% for instance in instances %}
+        <tr>
+          {% for field in instance.fields %}
+            <td>
+              {{ field }}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+{% endblock %}

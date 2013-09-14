@@ -20,6 +20,13 @@ class DemoTests(object):
     def test_models_are_listed_on_index_page(self):
         front_page = self.browser.open_front_page()
         assert_equal(["Author", "Blog post"], front_page.model_names())
+        
+    def test_instances_of_model_are_listed_on_model_index_page(self):
+        front_page = self.browser.open_front_page()
+        post_index = front_page.open_model("Blog post")
+        posts_table = post_index.instances_table()
+        assert_equal(["Title", "Author", "Date"], posts_table.headings())
+        assert_equal([["Apples", "Bob", "2013-09-05 00:00:00"], ["Bananas", "Bob", "2013-09-06 00:00:00"]], posts_table.rows())
 
 
 def _start_server():
@@ -86,4 +93,33 @@ class FrontPage(object):
         return [
             element.text
             for element in self._driver.find_elements_by_css_selector("h2")
+        ]
+        
+    def open_model(self, name):
+        self._driver.find_element_by_link_text(name).click()
+        return ModelIndexPage(self._driver)
+
+
+class ModelIndexPage(object):
+    def __init__(self, driver):
+        self._driver = driver
+        
+    def instances_table(self):
+        return Table(self._driver.find_element_by_tag_name("table"))
+        
+        
+class Table(object):
+    def __init__(self, element):
+        self._element = element
+        
+    def headings(self):
+        return [
+            element.text
+            for element in self._element.find_elements_by_tag_name("th")
+        ]
+        
+    def rows(self):
+        return [
+            [cell.text for cell in row.find_elements_by_tag_name("td")]
+            for row in self._element.find_elements_by_css_selector("tbody tr")
         ]

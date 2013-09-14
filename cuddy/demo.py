@@ -19,23 +19,44 @@ bob = Author("Bob")
 
 class AuthorAdmin(object):
     name = "Author"
+    slug = "author"
     
     fields = [
-        cuddy.field("name", type=cuddy.string)
+        cuddy.field("Name", "name", type=cuddy.string)
     ]
+    
+    def describe(self, author):
+        return author.name
+    
+    def index_fields(self):
+        return [
+            cuddy.field("Name", "name", type=cuddy.string)
+        ]
+    
+    def fetch_all(self):
+        return [bob]
+
 
 class BlogPostAdmin(object):
     name = "Blog post"
+    slug = "blog-post"
     fields = [
-        cuddy.field("title", type=cuddy.string),
-        cuddy.field("author", type=AuthorAdmin),
-        cuddy.field("created_date", type=cuddy.datetime),
+        cuddy.field("Title", "title", type=cuddy.string),
+        cuddy.field("Author", "author", type=AuthorAdmin),
+        cuddy.field("Date", "created_date", type=cuddy.datetime),
     ]
+    
+    def index_fields(self):
+        return [
+            cuddy.field("Title", "title"),
+            cuddy.field("Author", lambda post: post.author.name),
+            cuddy.field("Date", "created_date"),
+        ]
     
     def fetch_all(self):
         return [
-            BlogPost("Apples", datetime(2013, 9, 5), author=bob),
-            BlogPost("Bananas", datetime(2013, 9, 6), author=bob),
+            BlogPost("Apples", created_date=datetime(2013, 9, 5), author=bob),
+            BlogPost("Bananas", created_date=datetime(2013, 9, 6), author=bob),
         ]
         
 

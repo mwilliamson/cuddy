@@ -5,6 +5,14 @@ class Model(object):
     
 
 class Field(object):
-    def __init__(self, name, type):
-        self._name = name
+    def __init__(self, title, getter, type=None):
+        if isinstance(getter, basestring):
+            attribute_name = getter
+            getter = lambda instance: getattr(instance, attribute_name)
+            
+        self.title = title
+        self._getter = getter
         self._type = type
+        
+    def read(self, instance):
+        return self._getter(instance)

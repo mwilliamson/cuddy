@@ -4,6 +4,6 @@
   <h1>Cuddy</h1>
   
   {% for model in models %}
-    <h2>{{ model.name }}</h2>
+    <h2><a href="{{ model.url }}">{{ model.name }}</a></h2>
   {% endfor %}
 {% endblock %}

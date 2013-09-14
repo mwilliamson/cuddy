@@ -22,10 +22,31 @@ class Cuddy(object):
         self._models.append(model)
     
     def respond(self, request):
-        return Response(
-            self._templates.template("index.html", {"models": self._models}),
-            mimetype="text/html",
-        )
+        path_parts = filter(lambda part: part, request.path.split("/"))
+        if len(path_parts) == 1:
+            model_slug = path_parts[0]
+            model = next(model for model in self._models if model.slug == model_slug)
+            
+            instances = [
+                {"fields": [field.read(instance) for field in model().index_fields()]}
+                for instance in model().fetch_all()
+            ]
+            
+            return Response(
+                self._templates.template("model-index.html", {"model": model, "instances": instances}),
+                mimetype="text/html",
+            )
+        else:
+            model_view_models = [
+                # TODO: reverse URLs
+                ModelViewModel(model.name, "/{0}".format(model.slug))
+                for model in self._models
+            ]
+            
+            return Response(
+                self._templates.template("index.html", {"models": model_view_models}),
+                mimetype="text/html",
+            )
 
     def wsgi_app(self):
         def handle(environ, start_response):
@@ -37,3 +58,9 @@ class Cuddy(object):
             return response(environ, start_response)
             
         return handle
+
+
+class ModelViewModel(object):
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
