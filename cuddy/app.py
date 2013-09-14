@@ -53,12 +53,11 @@ class Cuddy(object):
         def handle(environ, start_response):
             request = Request(environ)
             response = self.respond(request)
-            response = SharedDataMiddleware(response, {
-                "/static": paths.local_project_path("static"),
-            })
             return response(environ, start_response)
             
-        return handle
+        return SharedDataMiddleware(handle, {
+            "/static": paths.local_project_path("static"),
+        })
 
 
 class ModelViewModel(object):
