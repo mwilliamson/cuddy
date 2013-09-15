@@ -27,6 +27,18 @@ class DemoTests(object):
         posts_table = post_index.instances_table()
         assert_equal(["Title", "Author", "Date"], posts_table.headings())
         assert_equal([["Apples", "Bob", "2013-09-05 00:00:00"], ["Bananas", "Bob", "2013-09-06 00:00:00"]], posts_table.rows())
+        
+    def test_can_visit_model_instance_page_from_index(self):
+        front_page = self.browser.open_front_page()
+        post_index = front_page.open_model("Blog post")
+        post_page = post_index.open_instance("Apples")
+        assert_equal("Apples", post_page.title())
+        
+    #~ def test_fields_of_model_are_listed_on_model_instance_page(self):
+        #~ front_page = self.browser.open_front_page()
+        #~ post_index = front_page.open_model("Blog post")
+        #~ post_page = post_index.open_instance("Apples")
+        
 
 
 def _start_server():
@@ -107,7 +119,19 @@ class ModelIndexPage(object):
     def instances_table(self):
         return Table(self._driver.find_element_by_tag_name("table"))
         
+    def open_instance(self, link_text):
+        self._driver.find_element_by_link_text(link_text).click()
+        return ModelInstancePage(self._driver)
+
+
+class ModelInstancePage(object):
+    def __init__(self, driver):
+        self._driver = driver
         
+    def title(self):
+        return self._driver.find_element_by_tag_name("h2").text
+
+
 class Table(object):
     def __init__(self, element):
         self._element = element

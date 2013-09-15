@@ -14,7 +14,13 @@
         <tr>
           {% for field in instance.fields %}
             <td>
-              {{ field }}
+              {% if edit_link_field == field.title %}
+                <a href="{{ instance.url }}">
+              {% endif %}
+              {{ field.value }}
+              {% if loop.first %}
+                </a>
+              {% endif %}
             </td>
           {% endfor %}
         </tr>
