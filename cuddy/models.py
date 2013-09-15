@@ -21,3 +21,13 @@ class Field(object):
             return value_admin.short_describe(value)
         else:
             return str(value)
+            
+    def editor(self, instance):
+        # TODO: grab editor from self._type
+        # TODO: use proper templating/escaping
+        value = self._getter(instance)
+        return '<input class="form-control" type="text" value="{0}" name="{1}" id="{1}" />'.format(value, self.slug)
+    
+    @property
+    def slug(self):
+        return self.title.lower()

@@ -5,4 +5,15 @@
   
   <h2>{{ title }}</h2>
   
+  <form>
+    {% for field in fields %}
+      <p class="form-group">
+        <label for="{{ field.slug }}">
+          {{ field.title }}
+        </label>
+        {{ field.editor|safe }}
+      </p>
+    {% endfor %}
+  </form>
+  
 {% endblock %}
