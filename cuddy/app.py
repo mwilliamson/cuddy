@@ -78,7 +78,7 @@ class ModelInstanceController(zuice.Base):
         
         instance = model_admin.fetch_by_id(instance_id)
         context = {
-            "title": model_admin.short_describe(instance),
+            "title": "{0}: {1}".format(model_admin.name, model_admin.short_describe(instance)),
             "fields": [
                 {
                     "title": field.title,

@@ -32,7 +32,7 @@ class DemoTests(object):
         front_page = self.browser.open_front_page()
         post_index = front_page.open_model("Blog post")
         post_page = post_index.open_instance("Apples")
-        assert_equal("Apples", post_page.title())
+        assert_equal("Blog post: Apples", post_page.title())
         
     def test_fields_of_model_are_listed_on_model_instance_page(self):
         front_page = self.browser.open_front_page()
