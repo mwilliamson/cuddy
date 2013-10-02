@@ -1,5 +1,6 @@
 from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import SharedDataMiddleware
+from werkzeug.routing import Map, Rule, NotFound, RequestRedirect
 import zuice
 
 from . import templating, paths
@@ -94,8 +95,13 @@ class ModelInstanceController(zuice.Base):
             mimetype="text/html",
         )
 
-    
-    
+
+url_map = Map([
+    Rule('/', endpoint=IndexController),
+    Rule('/<model_slug>', endpoint=ModelIndexController),
+    Rule('/<model_slug>/<instance_id>', endpoint=ModelInstanceController),
+])
+
 
 class Cuddy(object):
     def __init__(self):
@@ -104,7 +110,7 @@ class Cuddy(object):
     def add(self, model):
         self._models.append(model)
     
-    def respond(self, request):
+    def respond(self, request, urls):
         bindings = zuice.Bindings()
         bindings.bind("model-admins").to_provider(lambda injector: map(injector.get, self._models))
         bindings.bind(templating.Templates).to_instance(templating.templates())
@@ -112,20 +118,16 @@ class Cuddy(object):
         injector = zuice.Injector(bindings)
         path_parts = filter(lambda part: part, request.path.split("/"))
         
-        if len(path_parts) == 1:
-            controller_cls = ModelIndexController
-        elif len(path_parts) == 2:
-            controller_cls = ModelInstanceController
-        else:
-            controller_cls = IndexController
+        controller_cls, args = urls.match()
             
         controller = injector.get(controller_cls)
-        return controller.respond(request, *path_parts)
+        return controller.respond(request, **args)
 
     def wsgi_app(self):
         def handle(environ, start_response):
             request = Request(environ)
-            response = self.respond(request)
+            urls = url_map.bind_to_environ(environ)
+            response = self.respond(request, urls)
             return response(environ, start_response)
             
         return SharedDataMiddleware(handle, {
